@@ -486,7 +486,6 @@ html, body {
   line-height: 1.4;
 }
 
-.mc-status--applied  { background: #FFF4E5; color: rgb(178, 106, 0); }
 .mc-status--approved { background: #E4F3EB; color: rgb(31, 138, 91); }
 .mc-status--source { background: #FFEAEA; color: var(--brand-crimson); }
 .mc-status--failed { background: var(--neutral-200); color: var(--neutral-700); }
@@ -798,7 +797,7 @@ html, body {
 /* ── ① 假資料：之後接 API 就換掉這個陣列 ────────────────────────
    tradeDate/offsetDate/applyDate 用 YYYY-MM-DD，畫面顯示自動轉民國年。
    fromType / toType： 現買 = cash、融資 = margin、融券 = short
-   status： applied 審核中、approved 已通過、source 券源不足、failed 其他
+   status： approved 已通過、source 券源不足、failed 其他
    當日名單以 applyDate === BUSINESS_DATE 區分；其餘進歷史改類紀錄。 */
 function todayIso() {
   const d = new Date();
@@ -808,20 +807,20 @@ function todayIso() {
 const BUSINESS_DATE = todayIso();
 
 const MOCK_ROWS = [
-  { id: 'R001', tradeDate: BUSINESS_DATE, applyDate: BUSINESS_DATE, orderNo: 'A0000112', account: '6620980', stockCode: '2330', stockName: '台積電',   side: 'B', lots: 5,  price: 1085.0, fromType: 'cash', toType: 'margin', offsetDate: BUSINESS_DATE, status: 'applied',  reason: '' },
-  { id: 'R002', tradeDate: BUSINESS_DATE, applyDate: BUSINESS_DATE, orderNo: 'A0000118', account: '6620981', stockCode: '2317', stockName: '鴻海',     side: 'B', lots: 12, price: 214.5,  fromType: 'cash', toType: 'margin', offsetDate: BUSINESS_DATE, status: 'applied',  reason: '' },
-  { id: 'R003', tradeDate: BUSINESS_DATE, applyDate: BUSINESS_DATE, orderNo: 'A0000121', account: '6620982', stockCode: '2454', stockName: '聯發科',   side: 'B', lots: 2,  price: 1420.0, fromType: 'cash', toType: 'margin', offsetDate: BUSINESS_DATE, status: 'approved', reason: '' },
-  { id: 'R004', tradeDate: BUSINESS_DATE, applyDate: BUSINESS_DATE, orderNo: 'A0000125', account: '6620983', stockCode: '2882', stockName: '國泰金',   side: 'B', lots: 20, price: 68.9,   fromType: 'cash', toType: 'margin', offsetDate: BUSINESS_DATE, status: 'source',   reason: '券源不足' },
-  { id: 'R005', tradeDate: BUSINESS_DATE, applyDate: BUSINESS_DATE, orderNo: 'A0000128', account: '6620984', stockCode: '2603', stockName: '長榮',     side: 'B', lots: 8,  price: 196.0,  fromType: 'cash', toType: 'margin', offsetDate: BUSINESS_DATE, status: 'failed',   reason: '額度不足' },
-  { id: 'R006', tradeDate: '2026-08-25', applyDate: '2026-08-25', orderNo: 'A0000103', account: '6620985', stockCode: '2609', stockName: '陽明',     side: 'B', lots: 15, price: 84.3,   fromType: 'cash', toType: 'margin', offsetDate: '2026-08-25', status: 'approved', reason: '' },
-  { id: 'R007', tradeDate: '2026-08-24', applyDate: '2026-08-24', orderNo: 'A0000081', account: '6620986', stockCode: '2412', stockName: '中華電',   side: 'B', lots: 6,  price: 132.5,  fromType: 'cash', toType: 'margin', offsetDate: '2026-08-24', status: 'approved', reason: '' },
-  { id: 'R008', tradeDate: '2026-08-24', applyDate: '2026-08-24', orderNo: 'A0000084', account: '6620987', stockCode: '3008', stockName: '大立光',   side: 'B', lots: 1,  price: 2385.0, fromType: 'cash', toType: 'margin', offsetDate: '2026-08-24', status: 'source',   reason: '券源不足' },
-  { id: 'R009', tradeDate: '2026-08-24', applyDate: '2026-08-24', orderNo: 'A0000088', account: '6620988', stockCode: '2308', stockName: '台達電',   side: 'B', lots: 4,  price: 903.0,  fromType: 'cash', toType: 'margin', offsetDate: '2026-08-24', status: 'failed',   reason: '連線異常' },
-  { id: 'R010', tradeDate: '2026-08-23', applyDate: '2026-08-23', orderNo: 'A0000072', account: '6620989', stockCode: '2891', stockName: '中信金',   side: 'B', lots: 30, price: 42.15,  fromType: 'cash', toType: 'margin', offsetDate: '2026-08-23', status: 'approved', reason: '' },
-  { id: 'R011', tradeDate: '2026-08-23', applyDate: '2026-08-23', orderNo: 'A0000075', account: '6620990', stockCode: '2303', stockName: '聯電',     side: 'B', lots: 25, price: 58.7,   fromType: 'cash', toType: 'margin', offsetDate: '2026-08-23', status: 'failed',   reason: '額度不足' },
-  { id: 'R012', tradeDate: '2026-08-23', applyDate: '2026-08-23', orderNo: 'A0000079', account: '6620991', stockCode: '1301', stockName: '台塑',     side: 'B', lots: 10, price: 44.6,   fromType: 'cash', toType: 'margin', offsetDate: '2026-08-23', status: 'approved', reason: '' },
-  { id: 'R013', tradeDate: '2026-08-22', applyDate: '2026-08-22', orderNo: 'A0000064', account: '6620992', stockCode: '2002', stockName: '中鋼',     side: 'B', lots: 18, price: 21.9,   fromType: 'cash', toType: 'margin', offsetDate: '2026-08-22', status: 'approved', reason: '' },
-  { id: 'R014', tradeDate: '2026-08-22', applyDate: '2026-08-22', orderNo: 'A0000068', account: '6620993', stockCode: '2357', stockName: '華碩',     side: 'B', lots: 3,  price: 682.0,  fromType: 'cash', toType: 'margin', offsetDate: '2026-08-22', status: 'source',   reason: '券源不足' },
+  { id: 'R001', tradeDate: BUSINESS_DATE, applyDate: BUSINESS_DATE, orderNo: 'A0000112', account: '6620980', accountName: '王小明', stockCode: '2330', stockName: '台積電',   side: 'B', lots: 5,  price: 1085.0, fromType: 'cash', toType: 'margin', offsetDate: BUSINESS_DATE, status: 'approved', reason: '' },
+  { id: 'R002', tradeDate: BUSINESS_DATE, applyDate: BUSINESS_DATE, orderNo: 'A0000118', account: '6620981', accountName: '李美玲', stockCode: '2317', stockName: '鴻海',     side: 'B', lots: 12, price: 214.5,  fromType: 'cash', toType: 'margin', offsetDate: BUSINESS_DATE, status: 'approved', reason: '' },
+  { id: 'R003', tradeDate: BUSINESS_DATE, applyDate: BUSINESS_DATE, orderNo: 'A0000121', account: '6620982', accountName: '陳志豪', stockCode: '2454', stockName: '聯發科',   side: 'B', lots: 2,  price: 1420.0, fromType: 'cash', toType: 'margin', offsetDate: BUSINESS_DATE, status: 'approved', reason: '' },
+  { id: 'R004', tradeDate: BUSINESS_DATE, applyDate: BUSINESS_DATE, orderNo: 'A0000125', account: '6620983', accountName: '林雅婷', stockCode: '2882', stockName: '國泰金',   side: 'B', lots: 20, price: 68.9,   fromType: 'cash', toType: 'margin', offsetDate: BUSINESS_DATE, status: 'source',   reason: '券源不足' },
+  { id: 'R005', tradeDate: BUSINESS_DATE, applyDate: BUSINESS_DATE, orderNo: 'A0000128', account: '6620984', accountName: '張建國', stockCode: '2603', stockName: '長榮',     side: 'B', lots: 8,  price: 196.0,  fromType: 'cash', toType: 'margin', offsetDate: BUSINESS_DATE, status: 'failed',   reason: '額度不足' },
+  { id: 'R006', tradeDate: '2026-08-25', applyDate: '2026-08-25', orderNo: 'A0000103', account: '6620985', accountName: '黃淑芬', stockCode: '2609', stockName: '陽明',     side: 'B', lots: 15, price: 84.3,   fromType: 'cash', toType: 'margin', offsetDate: '2026-08-25', status: 'approved', reason: '' },
+  { id: 'R007', tradeDate: '2026-08-24', applyDate: '2026-08-24', orderNo: 'A0000081', account: '6620986', accountName: '吳俊傑', stockCode: '2412', stockName: '中華電',   side: 'B', lots: 6,  price: 132.5,  fromType: 'cash', toType: 'margin', offsetDate: '2026-08-24', status: 'approved', reason: '' },
+  { id: 'R008', tradeDate: '2026-08-24', applyDate: '2026-08-24', orderNo: 'A0000084', account: '6620987', accountName: '蔡佩君', stockCode: '3008', stockName: '大立光',   side: 'B', lots: 1,  price: 2385.0, fromType: 'cash', toType: 'margin', offsetDate: '2026-08-24', status: 'source',   reason: '券源不足' },
+  { id: 'R009', tradeDate: '2026-08-24', applyDate: '2026-08-24', orderNo: 'A0000088', account: '6620988', accountName: '劉承恩', stockCode: '2308', stockName: '台達電',   side: 'B', lots: 4,  price: 903.0,  fromType: 'cash', toType: 'margin', offsetDate: '2026-08-24', status: 'failed',   reason: '連線異常' },
+  { id: 'R010', tradeDate: '2026-08-23', applyDate: '2026-08-23', orderNo: 'A0000072', account: '6620989', accountName: '鄭文凱', stockCode: '2891', stockName: '中信金',   side: 'B', lots: 30, price: 42.15,  fromType: 'cash', toType: 'margin', offsetDate: '2026-08-23', status: 'approved', reason: '' },
+  { id: 'R011', tradeDate: '2026-08-23', applyDate: '2026-08-23', orderNo: 'A0000075', account: '6620990', accountName: '許佳慧', stockCode: '2303', stockName: '聯電',     side: 'B', lots: 25, price: 58.7,   fromType: 'cash', toType: 'margin', offsetDate: '2026-08-23', status: 'failed',   reason: '額度不足' },
+  { id: 'R012', tradeDate: '2026-08-23', applyDate: '2026-08-23', orderNo: 'A0000079', account: '6620991', accountName: '周明哲', stockCode: '1301', stockName: '台塑',     side: 'B', lots: 10, price: 44.6,   fromType: 'cash', toType: 'margin', offsetDate: '2026-08-23', status: 'approved', reason: '' },
+  { id: 'R013', tradeDate: '2026-08-22', applyDate: '2026-08-22', orderNo: 'A0000064', account: '6620992', accountName: '楊雅雯', stockCode: '2002', stockName: '中鋼',     side: 'B', lots: 18, price: 21.9,   fromType: 'cash', toType: 'margin', offsetDate: '2026-08-22', status: 'approved', reason: '' },
+  { id: 'R014', tradeDate: '2026-08-22', applyDate: '2026-08-22', orderNo: 'A0000068', account: '6620993', accountName: '趙家豪', stockCode: '2357', stockName: '華碩',     side: 'B', lots: 3,  price: 682.0,  fromType: 'cash', toType: 'margin', offsetDate: '2026-08-22', status: 'source',   reason: '券源不足' },
 ];
 
 /* ── ② 對照表：交易類別、買賣別、狀態 ─────────────────────────── */
@@ -835,7 +834,6 @@ const SIDE_MAP = { B: '買進 (B)', S: '賣出 (S)' };
 const SIDE_SHORT = { B: '買進', S: '賣出' };
 
 const STATUS_MAP = {
-  applied:  { label: '審核中', className: 'mc-status--applied' },
   approved: { label: '已通過', className: 'mc-status--approved' },
   source:   { label: '券源不足', className: 'mc-status--source' },
   failed:   { label: '其他', className: 'mc-status--failed' },
@@ -857,6 +855,7 @@ const COLUMNS = [
   { key: 'tradeDate',  label: '成交日期',   sortable: true,  render: r => formatRocDate(r.tradeDate) },
   { key: 'orderNo',    label: '委託書編號', sortable: true,  numeric: true },
   { key: 'account',    label: '委託人帳號', sortable: true,  numeric: true },
+  { key: 'accountName', label: '委託人姓名', sortable: true },
   { key: 'stockName',  label: '股票名稱',   sortable: true,  className: 'mc-td--stock', render: r => <>{r.stockName}<br />({r.stockCode})</> },
   { key: 'side',       label: 'B / S',      sortable: false, render: r => SIDE_SHORT[r.side] || r.side },
   { key: 'lots',       label: '成交張數',   sortable: true,  numeric: true, render: r => formatNumber(r.lots) },
@@ -917,7 +916,7 @@ function TypeTag({ type }) {
 }
 
 function StatusPill({ status }) {
-  const s = STATUS_MAP[status] || STATUS_MAP.applied;
+  const s = STATUS_MAP[status] || STATUS_MAP.approved;
   return <span className={`mc-status ${s.className}`}>{s.label}</span>;
 }
 
@@ -1022,62 +1021,6 @@ function Shell({ children }) {
   );
 }
 
-/* ── 明細彈窗（唯讀） ─────────────────────────────────────────── */
-function DetailModal({ row, onClose }) {
-  const fields = [
-    ['成交日期', formatRocDate(row.tradeDate)],
-    ['委託書編號', row.orderNo],
-    ['委託人帳號', row.account],
-    ['股票名稱', `${row.stockName} (${row.stockCode})`],
-    ['B / S', SIDE_MAP[row.side] || row.side],
-    ['成交張數', formatNumber(row.lots)],
-    ['單價', formatPrice(row.price)],
-    ['沖抵日期', formatRocDate(row.offsetDate)],
-  ];
-
-  return (
-    <div className="mc-overlay" onClick={onClose} role="presentation">
-      <div className="mc-modal" onClick={e => e.stopPropagation()} role="dialog" aria-modal="true" aria-label="改類明細">
-        <div className="mc-modal__head">
-          改類明細
-          <button type="button" className="mc-modal__close" onClick={onClose} aria-label="關閉">×</button>
-        </div>
-        <div className="mc-modal__body">
-          <div className="mc-detail-grid">
-            {fields.map(([label, value]) => (
-              <div className="mc-detail-row" key={label}>
-                <span className="mc-detail-row__label">{label}</span>
-                <span className="mc-detail-row__value">{value}</span>
-              </div>
-            ))}
-            <div className="mc-detail-row">
-              <span className="mc-detail-row__label">成交類別 → 更正後類別</span>
-              <span className="mc-detail-row__value" style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
-                <TypeTag type={row.fromType} />
-                <span style={{ color: 'var(--neutral-700)' }}>→</span>
-                <TypeTag type={row.toType} />
-              </span>
-            </div>
-            <div className="mc-detail-row">
-              <span className="mc-detail-row__label">狀態</span>
-              <span className="mc-detail-row__value"><StatusPill status={row.status} /></span>
-            </div>
-            {(row.status === 'source' || row.status === 'failed') && row.reason && (
-              <div className="mc-detail-row mc-detail-row--full">
-                <span className="mc-detail-row__label">原因說明</span>
-                <span className="mc-detail-row__value">{row.reason}</span>
-              </div>
-            )}
-          </div>
-        </div>
-        <div className="mc-modal__actions">
-          <button type="button" className="mc-btn mc-btn--plain" onClick={onClose}>關閉</button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
 /* ── 主頁面 ───────────────────────────────────────────────────── */
 function MarginChangePage() {
   const [sheet, setSheet] = React.useState('today');
@@ -1087,7 +1030,6 @@ function MarginChangePage() {
   const [sort, setSort] = React.useState({ key: 'tradeDate', dir: 'desc' });
   const [page, setPage] = React.useState(1);
   const [notice, setNotice] = React.useState('');
-  const [detailRow, setDetailRow] = React.useState(null);
 
   const setField = (key, value) => setDraftQuery(q => ({ ...q, [key]: value }));
   const isTodaySheet = sheet === 'today';
@@ -1153,7 +1095,6 @@ function MarginChangePage() {
     setSheet(next);
     setPage(1);
     setNotice('');
-    setDetailRow(null);
   };
 
   const exportCsv = () => {
@@ -1162,6 +1103,7 @@ function MarginChangePage() {
       formatRocDate(r.tradeDate),
       r.orderNo,
       r.account,
+      r.accountName || '',
       `${r.stockName} (${r.stockCode})`,
       SIDE_MAP[r.side] || r.side,
       r.lots,
@@ -1249,7 +1191,6 @@ function MarginChangePage() {
             <span>狀態</span>
             <select value={draftQuery.status} onChange={e => setField('status', e.target.value)}>
               <option value="">全部</option>
-              <option value="applied">審核中</option>
               <option value="approved">已通過</option>
               <option value="source">券源不足</option>
               <option value="failed">其他</option>
@@ -1290,8 +1231,6 @@ function MarginChangePage() {
               <tr
                 key={r.id}
                 className={i % 2 === 0 ? 'mc-tr--odd' : 'mc-tr--even'}
-                onClick={() => setDetailRow(r)}
-                style={{ cursor: 'pointer' }}
               >
                 {COLUMNS.map(c => (
                   <td key={c.key} className={'mc-td' + (c.numeric ? ' mc-td--num' : '') + (c.className ? ' ' + c.className : '')}>
@@ -1306,13 +1245,6 @@ function MarginChangePage() {
       </div>
 
       <Pagination page={currentPage} totalItems={sorted.length} onChange={setPage} />
-
-      {detailRow && (
-        <DetailModal
-          row={rows.find(r => r.id === detailRow.id) || detailRow}
-          onClose={() => setDetailRow(null)}
-        />
-      )}
     </div>
   );
 }
