@@ -488,7 +488,8 @@ html, body {
 
 .mc-status--approved { background: #E4F3EB; color: rgb(31, 138, 91); }
 .mc-status--source { background: #FFEAEA; color: var(--brand-crimson); }
-.mc-status--failed { background: var(--neutral-200); color: var(--neutral-700); }
+.mc-status--error { background: #F3E8FF; color: #6B21A8; }
+.mc-status--control { background: #FFF4E5; color: #B45309; }
 
 /* 列內操作 */
 .mc-row-actions {
@@ -799,8 +800,8 @@ html, body {
    fromType / toType： 現買 = cash、融資 = margin、融券 = short
    lots：成交張數；toLots：更正後張數（可小於成交張數，表示只改部分張）
    idNo：身分證字號（畫面欄位標為 ID）
-   status： approved 已通過、source 配額不足、failed 其他
-   當日名單以 applyDate === BUSINESS_DATE 區分；其餘進歷史改類紀錄。
+   status： approved 已通過、source 配額不足、error 系統錯誤、control 系統管制
+   單頁查詢；成交日期起迄預設為當日（BUSINESS_DATE），可擴大查詢歷史。
    ※ 列唯一鍵為 id（如 R001），與身分證 idNo 不同。 */
 function todayIso() {
   const d = new Date();
@@ -814,16 +815,16 @@ const MOCK_ROWS = [
   { id: 'R002', tradeDate: BUSINESS_DATE, applyDate: BUSINESS_DATE, orderNo: 'A0000118', idNo: 'B234567890', account: '6620981', accountName: '李美玲', stockCode: '2317', stockName: '鴻海',     side: 'B', lots: 12, toLots: 12, price: 214.5,  fromType: 'cash', toType: 'margin', offsetDate: BUSINESS_DATE, status: 'approved', reason: '' },
   { id: 'R003', tradeDate: BUSINESS_DATE, applyDate: BUSINESS_DATE, orderNo: 'A0000121', idNo: 'C345678901', account: '6620982', accountName: '陳志豪', stockCode: '2454', stockName: '聯發科',   side: 'B', lots: 2,  toLots: 2,  price: 1420.0, fromType: 'cash', toType: 'margin', offsetDate: BUSINESS_DATE, status: 'approved', reason: '' },
   { id: 'R004', tradeDate: BUSINESS_DATE, applyDate: BUSINESS_DATE, orderNo: 'A0000125', idNo: 'D456789012', account: '6620983', accountName: '林雅婷', stockCode: '2882', stockName: '國泰金',   side: 'B', lots: 20, toLots: 10, price: 68.9,   fromType: 'cash', toType: 'margin', offsetDate: BUSINESS_DATE, status: 'source',   reason: '配額不足' },
-  { id: 'R005', tradeDate: BUSINESS_DATE, applyDate: BUSINESS_DATE, orderNo: 'A0000128', idNo: 'E567890123', account: '6620984', accountName: '張建國', stockCode: '2603', stockName: '長榮',     side: 'B', lots: 8,  toLots: 8,  price: 196.0,  fromType: 'cash', toType: 'margin', offsetDate: BUSINESS_DATE, status: 'failed',   reason: '額度不足' },
+  { id: 'R005', tradeDate: BUSINESS_DATE, applyDate: BUSINESS_DATE, orderNo: 'A0000128', idNo: 'E567890123', account: '6620984', accountName: '張建國', stockCode: '2603', stockName: '長榮',     side: 'B', lots: 8,  toLots: 8,  price: 196.0,  fromType: 'cash', toType: 'margin', offsetDate: BUSINESS_DATE, status: 'error',    reason: '系統錯誤' },
   { id: 'R006', tradeDate: '2026-08-25', applyDate: '2026-08-25', orderNo: 'A0000103', idNo: 'F678901234', account: '6620985', accountName: '黃淑芬', stockCode: '2609', stockName: '陽明',     side: 'B', lots: 15, toLots: 8,  price: 84.3,   fromType: 'cash', toType: 'margin', offsetDate: '2026-08-25', status: 'approved', reason: '' },
   { id: 'R007', tradeDate: '2026-08-24', applyDate: '2026-08-24', orderNo: 'A0000081', idNo: 'G789012345', account: '6620986', accountName: '吳俊傑', stockCode: '2412', stockName: '中華電',   side: 'B', lots: 6,  toLots: 6,  price: 132.5,  fromType: 'cash', toType: 'margin', offsetDate: '2026-08-24', status: 'approved', reason: '' },
   { id: 'R008', tradeDate: '2026-08-24', applyDate: '2026-08-24', orderNo: 'A0000084', idNo: 'H890123456', account: '6620987', accountName: '蔡佩君', stockCode: '3008', stockName: '大立光',   side: 'B', lots: 1,  toLots: 1,  price: 2385.0, fromType: 'cash', toType: 'margin', offsetDate: '2026-08-24', status: 'source',   reason: '配額不足' },
-  { id: 'R009', tradeDate: '2026-08-24', applyDate: '2026-08-24', orderNo: 'A0000088', idNo: 'I901234567', account: '6620988', accountName: '劉承恩', stockCode: '2308', stockName: '台達電',   side: 'B', lots: 4,  toLots: 2,  price: 903.0,  fromType: 'cash', toType: 'margin', offsetDate: '2026-08-24', status: 'failed',   reason: '連線異常' },
+  { id: 'R009', tradeDate: '2026-08-24', applyDate: '2026-08-24', orderNo: 'A0000088', idNo: 'I901234567', account: '6620988', accountName: '劉承恩', stockCode: '2308', stockName: '台達電',   side: 'B', lots: 4,  toLots: 2,  price: 903.0,  fromType: 'cash', toType: 'margin', offsetDate: '2026-08-24', status: 'error',    reason: '系統錯誤' },
   { id: 'R010', tradeDate: '2026-08-23', applyDate: '2026-08-23', orderNo: 'A0000072', idNo: 'J012345678', account: '6620989', accountName: '鄭文凱', stockCode: '2891', stockName: '中信金',   side: 'B', lots: 30, toLots: 20, price: 42.15,  fromType: 'cash', toType: 'margin', offsetDate: '2026-08-23', status: 'approved', reason: '' },
-  { id: 'R011', tradeDate: '2026-08-23', applyDate: '2026-08-23', orderNo: 'A0000075', idNo: 'K123456780', account: '6620990', accountName: '許佳慧', stockCode: '2303', stockName: '聯電',     side: 'B', lots: 25, toLots: 25, price: 58.7,   fromType: 'cash', toType: 'margin', offsetDate: '2026-08-23', status: 'failed',   reason: '額度不足' },
+  { id: 'R011', tradeDate: '2026-08-23', applyDate: '2026-08-23', orderNo: 'A0000075', idNo: 'K123456780', account: '6620990', accountName: '許佳慧', stockCode: '2303', stockName: '聯電',     side: 'B', lots: 25, toLots: 25, price: 58.7,   fromType: 'cash', toType: 'margin', offsetDate: '2026-08-23', status: 'control',  reason: '系統管制' },
   { id: 'R012', tradeDate: '2026-08-23', applyDate: '2026-08-23', orderNo: 'A0000079', idNo: 'L234567801', account: '6620991', accountName: '周明哲', stockCode: '1301', stockName: '台塑',     side: 'B', lots: 10, toLots: 10, price: 44.6,   fromType: 'cash', toType: 'margin', offsetDate: '2026-08-23', status: 'approved', reason: '' },
   { id: 'R013', tradeDate: '2026-08-22', applyDate: '2026-08-22', orderNo: 'A0000064', idNo: 'M345678012', account: '6620992', accountName: '楊雅雯', stockCode: '2002', stockName: '中鋼',     side: 'B', lots: 18, toLots: 12, price: 21.9,   fromType: 'cash', toType: 'margin', offsetDate: '2026-08-22', status: 'approved', reason: '' },
-  { id: 'R014', tradeDate: '2026-08-22', applyDate: '2026-08-22', orderNo: 'A0000068', idNo: 'N456780123', account: '6620993', accountName: '趙家豪', stockCode: '2357', stockName: '華碩',     side: 'B', lots: 3,  toLots: 1,  price: 682.0,  fromType: 'cash', toType: 'margin', offsetDate: '2026-08-22', status: 'source',   reason: '配額不足' },
+  { id: 'R014', tradeDate: '2026-08-22', applyDate: '2026-08-22', orderNo: 'A0000068', idNo: 'N456780123', account: '6620993', accountName: '趙家豪', stockCode: '2357', stockName: '華碩',     side: 'B', lots: 3,  toLots: 1,  price: 682.0,  fromType: 'cash', toType: 'margin', offsetDate: '2026-08-22', status: 'control',  reason: '系統管制' },
 ];
 
 /* ── ② 對照表：交易類別、買賣別、狀態 ─────────────────────────── */
@@ -839,13 +840,9 @@ const SIDE_SHORT = { B: '買進', S: '賣出' };
 const STATUS_MAP = {
   approved: { label: '已通過', className: 'mc-status--approved' },
   source:   { label: '配額不足', className: 'mc-status--source' },
-  failed:   { label: '其他', className: 'mc-status--failed' },
+  error:    { label: '系統錯誤', className: 'mc-status--error' },
+  control:  { label: '系統管制', className: 'mc-status--control' },
 };
-
-const SHEETS = [
-  { id: 'today', label: '當日改類名單' },
-  { id: 'history', label: '歷史改類紀錄' },
-];
 
 const PAGE_SIZE = 10;
 
@@ -871,10 +868,10 @@ const COLUMNS = [
   { key: 'status',     label: '狀態',       sortable: true,  render: r => <StatusPill status={r.status} /> },
 ];
 
-/* ── ④ 查詢條件初始值 ─────────────────────────────────────────── */
+/* ── ④ 查詢條件初始值（起迄預設當日）─────────────────────────── */
 const EMPTY_QUERY = {
-  dateStart: '',
-  dateEnd: '',
+  dateStart: BUSINESS_DATE,
+  dateEnd: BUSINESS_DATE,
   orderNo: '',
   idNo: '',
   account: '',
@@ -1027,7 +1024,6 @@ function Shell({ children }) {
 
 /* ── 主頁面 ───────────────────────────────────────────────────── */
 function MarginChangePage() {
-  const [sheet, setSheet] = React.useState('today');
   const [rows] = React.useState(MOCK_ROWS);
   const [draftQuery, setDraftQuery] = React.useState(EMPTY_QUERY);
   const [query, setQuery] = React.useState(EMPTY_QUERY);
@@ -1036,26 +1032,12 @@ function MarginChangePage() {
   const [notice, setNotice] = React.useState('');
 
   const setField = (key, value) => setDraftQuery(q => ({ ...q, [key]: value }));
-  const isTodaySheet = sheet === 'today';
-  const visibleColumns = React.useMemo(
-    () => COLUMNS.filter(c => !(isTodaySheet && c.key === 'tradeDate')),
-    [isTodaySheet]
-  );
-
-  const sheetRows = React.useMemo(() => (
-    rows.filter(r => {
-      const applyDate = r.applyDate || r.tradeDate;
-      return isTodaySheet ? applyDate === BUSINESS_DATE : applyDate !== BUSINESS_DATE;
-    })
-  ), [rows, isTodaySheet]);
 
   const filtered = React.useMemo(() => {
     const keyword = query.stock.trim().toLowerCase();
-    return sheetRows.filter(r => {
-      if (!isTodaySheet) {
-        if (query.dateStart && r.tradeDate < query.dateStart) return false;
-        if (query.dateEnd && r.tradeDate > query.dateEnd) return false;
-      }
+    return rows.filter(r => {
+      if (query.dateStart && r.tradeDate < query.dateStart) return false;
+      if (query.dateEnd && r.tradeDate > query.dateEnd) return false;
       if (query.orderNo && !r.orderNo.toLowerCase().includes(query.orderNo.trim().toLowerCase())) return false;
       if (query.idNo && !(r.idNo || '').toUpperCase().includes(query.idNo.trim().toUpperCase())) return false;
       if (query.account && !r.account.includes(query.account.trim())) return false;
@@ -1063,7 +1045,7 @@ function MarginChangePage() {
       if (query.status && r.status !== query.status) return false;
       return true;
     });
-  }, [sheetRows, query, isTodaySheet]);
+  }, [rows, query]);
 
   const sorted = React.useMemo(() => {
     const list = [...filtered];
@@ -1099,18 +1081,6 @@ function MarginChangePage() {
     setSort(s => (s.key === key ? { key, dir: s.dir === 'asc' ? 'desc' : 'asc' } : { key, dir: 'asc' }));
   };
 
-  const switchSheet = next => {
-    if (next === sheet) return;
-    setSheet(next);
-    setPage(1);
-    setNotice('');
-    if (next === 'today') {
-      setDraftQuery(q => ({ ...q, dateStart: '', dateEnd: '' }));
-      setQuery(q => ({ ...q, dateStart: '', dateEnd: '' }));
-      setSort(s => (s.key === 'tradeDate' ? { key: 'orderNo', dir: 'desc' } : s));
-    }
-  };
-
   const exportCsv = () => {
     const cellValue = (c, r) => {
       if (c.key === 'tradeDate' || c.key === 'offsetDate') return formatRocDate(r[c.key]);
@@ -1122,9 +1092,9 @@ function MarginChangePage() {
       if (c.key === 'status') return STATUS_MAP[r.status].label;
       return r[c.key] ?? '';
     };
-    const header = [...visibleColumns.map(c => c.label), '原因說明'];
+    const header = [...COLUMNS.map(c => c.label), '原因說明'];
     const lines = sorted.map(r => ([
-      ...visibleColumns.map(c => cellValue(c, r)),
+      ...COLUMNS.map(c => cellValue(c, r)),
       r.reason || '',
     ]));
     const csv = [header, ...lines]
@@ -1144,40 +1114,20 @@ function MarginChangePage() {
     <div className="cms-card">
       <h1 className="mc-page-title">現買改資買</h1>
 
-      <div className="mc-sheets" role="tablist" aria-label="改類名單分頁">
-        {SHEETS.map(s => (
-          <button
-            key={s.id}
-            type="button"
-            role="tab"
-            aria-selected={sheet === s.id}
-            className={'mc-sheet' + (sheet === s.id ? ' is-active' : '')}
-            onClick={() => switchSheet(s.id)}
-          >{s.label}</button>
-        ))}
-      </div>
-
-      {!isTodaySheet && (
-        <div className="mc-notice" role="note">該歷史改類資料僅有當日以前的資料（不含當日）</div>
-      )}
       {notice && <div className="mc-notice" role="status">{notice}</div>}
 
       {/* 查詢條件 */}
       <div className="mc-query">
         <span className="mc-query__title">查詢條件</span>
         <div className="mc-query__fields">
-          {!isTodaySheet && (
-            <>
-              <label className="mc-query__field">
-                <span>成交日期（起）</span>
-                <input type="date" value={draftQuery.dateStart} onChange={e => setField('dateStart', e.target.value)} />
-              </label>
-              <label className="mc-query__field">
-                <span>成交日期（迄）</span>
-                <input type="date" value={draftQuery.dateEnd} onChange={e => setField('dateEnd', e.target.value)} />
-              </label>
-            </>
-          )}
+          <label className="mc-query__field">
+            <span>成交日期（起）</span>
+            <input type="date" value={draftQuery.dateStart} onChange={e => setField('dateStart', e.target.value)} />
+          </label>
+          <label className="mc-query__field">
+            <span>成交日期（迄）</span>
+            <input type="date" value={draftQuery.dateEnd} onChange={e => setField('dateEnd', e.target.value)} />
+          </label>
           <label className="mc-query__field">
             <span>委託書編號</span>
             <input type="text" value={draftQuery.orderNo} onChange={e => setField('orderNo', e.target.value)} placeholder="輸入委託書編號" />
@@ -1200,7 +1150,8 @@ function MarginChangePage() {
               <option value="">全部</option>
               <option value="approved">已通過</option>
               <option value="source">配額不足</option>
-              <option value="failed">其他</option>
+              <option value="error">系統錯誤</option>
+              <option value="control">系統管制</option>
             </select>
           </label>
         </div>
@@ -1214,10 +1165,10 @@ function MarginChangePage() {
       {/* 工具列 */}
       <div className="mc-toolbar">
         <div className="mc-toolbar__meta">
-          <span>{isTodaySheet ? '當日' : '歷史'}符合 <strong>{formatNumber(filtered.length)}</strong> 筆</span>
+          <span>符合 <strong>{formatNumber(filtered.length)}</strong> 筆</span>
         </div>
         <div className="mc-toolbar__meta">
-          <span>營業日：{formatRocDate(BUSINESS_DATE)}</span>
+          <span>營業日：{formatRocDate(BUSINESS_DATE)}（預設查詢當日）</span>
         </div>
       </div>
 
@@ -1226,7 +1177,7 @@ function MarginChangePage() {
         <table>
           <thead>
             <tr>
-              {visibleColumns.map(c => (
+              {COLUMNS.map(c => (
                 <th key={c.key} className="mc-th">
                   <SortHeader column={c} sort={sort} onSort={toggleSort} />
                 </th>
@@ -1239,7 +1190,7 @@ function MarginChangePage() {
                 key={r.id}
                 className={i % 2 === 0 ? 'mc-tr--odd' : 'mc-tr--even'}
               >
-                {visibleColumns.map(c => (
+                {COLUMNS.map(c => (
                   <td key={c.key} className={'mc-td' + (c.numeric ? ' mc-td--num' : '') + (c.className ? ' ' + c.className : '')}>
                     {c.render ? c.render(r) : r[c.key]}
                   </td>
